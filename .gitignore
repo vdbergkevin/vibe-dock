@@ -1,0 +1,26 @@
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+
+# Local task runner state
+.task/
+
+# Build output and dependencies
+bin/
+build/bin/
+frontend/dist/
+frontend/node_modules/
+frontend/.svelte-kit/
+coverage/
+*.out
+
+# Local application state
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example

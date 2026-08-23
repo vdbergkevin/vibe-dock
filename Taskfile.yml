@@ -1,0 +1,108 @@
+version: '3'
+
+vars:
+  APP_NAME: vibedock{{exeExt}}
+  VITE_PORT: 5173
+
+tasks:
+  install:frontend:
+    summary: Install the pinned frontend dependencies
+    dir: frontend
+    sources:
+      - package.json
+      - package-lock.json
+    generates:
+      - node_modules/.package-lock.json
+    preconditions:
+      - sh: npm --version
+        msg: Node.js and npm are required.
+    cmds:
+      - npm ci
+
+  build:frontend:
+    summary: Build the Svelte interface
+    dir: frontend
+    deps:
+      - install:frontend
+    sources:
+      - index.html
+      - package.json
+      - src/**/*
+      - tsconfig.json
+      - vite.config.ts
+    generates:
+      - dist/index.html
+      - dist/assets/*
+    cmds:
+      - npm run build
+
+  generate:icons:
+    summary: Regenerate theme-aware native icon variants
+    sources:
+      - build/appicon.png
+      - tools/theme-icon/main.go
+    generates:
+      - build/appicon-light.png
+    cmds:
+      - go run ./tools/theme-icon
+
+  check:frontend:
+    summary: Type-check the Svelte interface
+    dir: frontend
+    deps:
+      - install:frontend
+    cmds:
+      - npm run check
+
+  build:backend:dev:
+    summary: Build the Go backend with debugger-friendly flags
+    deps:
+      - build:frontend
+    cmds:
+      - go build -gcflags=all="-N -l" -o bin/{{.APP_NAME}} .
+
+  build:
+    summary: Build a production desktop executable
+    deps:
+      - build:frontend
+      - generate:icons
+    cmds:
+      - go build -tags production -ldflags="-w -s" -o bin/{{.APP_NAME}} .
+
+  package:darwin:
+    summary: Package the production executable as a macOS application bundle
+    platform: darwin
+    deps:
+      - build
+    cmds:
+      - mkdir -p "bin/VibeDock.app/Contents/MacOS"
+      - mkdir -p "bin/VibeDock.app/Contents/Resources"
+      - cp bin/{{.APP_NAME}} "bin/VibeDock.app/Contents/MacOS/{{.APP_NAME}}"
+      - cp build/darwin/Info.plist "bin/VibeDock.app/Contents/Info.plist"
+      - cp build/darwin/AppIcon.icns "bin/VibeDock.app/Contents/Resources/AppIcon.icns"
+
+  run:
+    summary: Run the compiled application
+    cmds:
+      - ./bin/{{.APP_NAME}}
+
+  frontend:dev:
+    summary: Run Vite for Wails development mode
+    dir: frontend
+    deps:
+      - install:frontend
+    cmds:
+      - npm run dev -- --host 127.0.0.1 --port {{.VITE_PORT}}
+
+  dev:
+    summary: Run the native application with frontend and Go hot reload
+    cmds:
+      - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
+
+  test:
+    summary: Run backend and frontend verification
+    deps:
+      - build:frontend
+      - check:frontend
+    cmds:
+      - go test ./...

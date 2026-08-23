@@ -1,0 +1,38 @@
+# Wails v3 development configuration. Production builds are defined in Taskfile.yml.
+version: '3'
+
+info:
+  companyName: Kevin
+  productName: VibeDock
+  productIdentifier: com.kevin.vibedock
+  description: A fast native desktop client for Mistral Vibe
+  copyright: Copyright 2026
+  comments: Desktop UI for Mistral Vibe CLI
+  version: 0.1.0
+
+dev_mode:
+  root_path: .
+  log_level: warn
+  debounce: 400
+  ignore:
+    dir:
+      - .git
+      - bin
+      - frontend
+    file:
+      - .DS_Store
+      - vibe.db
+    watched_extension:
+      - '*.go'
+    git_ignore: true
+  executes:
+    - cmd: wails3 task install:frontend
+      type: once
+    - cmd: wails3 task frontend:dev
+      type: background
+    - cmd: wails3 task build:backend:dev
+      type: blocking
+    - cmd: wails3 task run
+      type: primary
+
+fileAssociations: []
