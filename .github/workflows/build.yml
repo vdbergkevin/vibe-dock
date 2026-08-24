@@ -105,6 +105,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Trust checkout for Git metadata
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Set up Go
         uses: actions/setup-go@v7
         with:

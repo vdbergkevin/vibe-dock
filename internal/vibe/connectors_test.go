@@ -3,6 +3,7 @@ package vibe
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -135,7 +136,10 @@ func TestSetConnectorEnabledWritesSecureValidConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if info.Mode().Perm() != 0o600 {
+	// Windows does not expose POSIX file permission bits and reports regular
+	// writable files as 0666 even after Chmod. Keep the security assertion on
+	// platforms where the requested mode can be represented.
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0o600 {
 		t.Fatalf("expected private config permissions, got %o", info.Mode().Perm())
 	}
 }
