@@ -1,5 +1,7 @@
 # VibeDock
 
+[![Build native applications](https://github.com/vdbergkevin/vibe-dock/actions/workflows/build.yml/badge.svg)](https://github.com/vdbergkevin/vibe-dock/actions/workflows/build.yml)
+
 A fast, native desktop client for [Mistral Vibe](https://github.com/mistralai/mistral-vibe), built with Go, Wails v3, Svelte 5, and SQLite.
 
 ## What is implemented
@@ -53,5 +55,9 @@ On Windows, run `.\scripts\build-windows.ps1` from PowerShell. The scripts check
 the Go and Node versions, run the backend/frontend verification, and produce the
 native platform artifact. See [scripts/README.md](scripts/README.md) for options,
 system packages, signing, and output locations.
+
+GitHub Actions runs those same scripts on native macOS, Ubuntu, Fedora, and
+Windows environments. Every run uploads a packaged application or executable;
+tagging a commit with a name such as `v0.1.0` also triggers all four builds.
 
 Application metadata is stored in the platform user config directory under `VibeDock/vibe.db`. Existing `Vibe Desktop` data is migrated automatically on first launch. Credentials are deliberately not stored in SQLite; ACP inherits the already-configured Vibe environment.
